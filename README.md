@@ -23,7 +23,7 @@ The package can be installed by adding `shopify_api` to your list of dependencie
 ```elixir
 def deps do
   [
-    {:shopify_api, github: "pixelunion/elixir-shopifyapi", tag: "v0.16.6"}
+    {:shopify_api, github: "ExShopify/elixir-shopifyapi", tag: "v0.16.6"}
   ]
 end
 ```
@@ -63,12 +63,12 @@ config :shopify_api, ShopifyAPI.ShopServer,
 With version 1.0 there are some stabilty changes and developer UX changes that make this easier to use.
 
 - Webhook Handler has been refactored to some simple configuration and a standard Phoenix Controller
-  - A [Webhook Scope](https://github.com/orbit-apps/elixir-shopifyapi/blob/next/lib/shopify_api/model/webhook_scope.ex) struct is passed along in to your controller for easier access of standard information (Shop, App, etc)
-  - The new setup is [here](https://github.com/orbit-apps/elixir-shopifyapi/blob/next/README.md#webhooks) as a intermediate step this could all be added and the controller could call the existing webhook handler module in the app's codebase.
+  - A [Webhook Scope](https://github.com/ExShopify/elixir-shopifyapi/blob/next/lib/shopify_api/model/webhook_scope.ex) struct is passed along in to your controller for easier access of standard information (Shop, App, etc)
+  - The new setup is [here](https://github.com/ExShopify/elixir-shopifyapi/blob/next/README.md#webhooks) as a intermediate step this could all be added and the controller could call the existing webhook handler module in the app's codebase.
 
 ## Installing this app in a Shop
 
-There is a boilerplate repo for quickly getting up and running at [ShopifyApp](https://github.com/pixelunion/elixir-shopify-app)
+There is a boilerplate repo for quickly getting up and running at [ShopifyApp](https://github.com/ExShopify/elixir-shopify-app)
 
 1. Start something like ngrok
 2. Configure your app to allow your ngrok url as one of the redirect_urls
@@ -226,11 +226,11 @@ We are soft deprecating the old `ShopifyAPI.graphql_request/4`. It will not be m
 
 ## REST
 
-The REST client has been moved to its [own repo](https://github.com/orbit-apps/elixir-shopifyapi-rest)
+The REST client has been moved to its [own repo](https://github.com/ExShopify/elixir-shopifyapi-rest)
 
 Using:
 
-- include the new dependency `{:shopify_api, github: "pixelunion/elixir-shopifyapi-rest", tag: "v0.1.0"}`
+- include the new dependency `{:shopify_api, github: "ExShopify/elixir-shopifyapi-rest", tag: "v0.1.0"}`
 - make clean and compile `mix clean && mix compile`, as there is an optional endpoint `ShopifyAPI.request/2`
   that is not compiled in unless the REST client is included.
 - make a REST call `iex> ShopifyAPI.REST.Product.all(token)`
