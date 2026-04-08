@@ -223,13 +223,15 @@ defmodule ShopifyAPI.Bulk.Query do
     end
   end
 
-  defp bulk_query_string(query) do
+  defp bulk_query_string(query, opts) do
     query_string = ShopifyAPI.JSONSerializer.encode!(query)
+    bulk_query_options = bulk_query_options(opts)
 
     """
     mutation {
       bulkOperationRunQuery(
         query: #{query_string}
+        #{bulk_query_options}
       ) {
         bulkOperation {
           id
@@ -335,6 +337,15 @@ defmodule ShopifyAPI.Bulk.Query do
       # No complete jsonl document yet
       true ->
         {[], element}
+    end
+  end
+
+  defp bulk_query_options(opts) do
+    opts
+    |> Keyword.get(:group_objects)
+    |> case do
+      nil -> ""
+      val -> "groupObjects: #{val}"
     end
   end
 end

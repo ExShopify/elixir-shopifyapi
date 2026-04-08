@@ -9,6 +9,16 @@
 - New: Reworked webhook flow, [check readme](README.md#Webhooks) for details on how to use
 - Deprecation: old Plugs.Webhook is being replaced and will be removed eventually
 
+## 0.16.6
+
+- New: Add support for passing options to `ShopifyAPI.Bulk.Query.exec/3`, with `group_objects`
+  as a new option to group the returned objects by a specified key.
+
+## 0.16.5
+
+- New: Add support for passing options to `ShopifyAPI.REST.Theme.create/3` and
+  `ShopifyAPI.REST.Theme.update/3`.
+
 ## 0.16.4
 
 - Fix: Add support for larger webhook payload bodies (15MB vs. the previous 8MB)
