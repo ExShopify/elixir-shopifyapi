@@ -21,10 +21,10 @@ defmodule ShopifyAPI.Bulk do
     - `:polling_rate` milliseconds between checks, defaults to 100
     - `:max_poll_count` maximum times to check for bulk query completion, defaults to 100
     - `:auto_cancel` boolean, should try to cancel bulk query after
-                   timeout, defaults to true
+                  timeout, defaults to true
     - `:group_objects` boolean, WARNING only available in GraphQL API version 2026-01 and above
-                   Should Objects be grouped in the response, according to Shopify grouping can
-                   slow down the query.
+                  Should Objects be grouped in the response, according to Shopify grouping can
+                  slow down the query.
 
   ## Example
       iex> prod_id = 10
@@ -97,7 +97,7 @@ defmodule ShopifyAPI.Bulk do
         %{"id" => "gid://shopify/Product/3"}
       ]
   """
-  @spec process_stream!(AuthToken.t(), String.t(), list() | integer()) :: Enumerable.t()
+  @spec process_stream!(AuthToken.t(), String.t(), Keyword.t() | integer()) :: Enumerable.t()
   def process_stream!(token, query, polling_rate \\ 100)
 
   def process_stream!(%AuthToken{} = token, query, polling_rate)
