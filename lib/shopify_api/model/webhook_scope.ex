@@ -21,7 +21,7 @@ defmodule ShopifyAPI.Model.WebhookScope do
   ]
 end
 
-defimpl ShopifyAPI.Scope, for: ShopifyAPI.Model.WebhoookScope do
+defimpl ShopifyAPI.Scope, for: ShopifyAPI.Model.WebhookScope do
   def shop(%{shop: shop}), do: shop
   def app(%{app: app}), do: app
 
