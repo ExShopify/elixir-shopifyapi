@@ -22,7 +22,7 @@ defmodule ShopifyAPI.Bulk.QueryTest do
 
     bypass = Bypass.open()
     myshopify_domain = "localhost:#{bypass.port}"
-    shop = build(:shop, domain: myshopify_domain)
+    shop = build(:shop, myshopify_domain: myshopify_domain)
     opts = [polling_rate: 1, max_poll_count: 1, auto_cancel: false]
 
     {:ok,

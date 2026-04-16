@@ -1,19 +1,13 @@
 defmodule ShopifyAPI.Bulk.TelemetryTest do
   use ExUnit.Case
-
-  alias ShopifyAPI.AuthToken
+  import ShopifyAPI.Factory
   alias ShopifyAPI.Bulk.Telemetry
 
   @module "module"
   @bulk_op_id "gid//test"
 
   setup do
-    token = %AuthToken{
-      token: "1234",
-      shop_name: "localhost"
-    }
-
-    {:ok, %{auth_token: token}}
+    [auth_token: build(:auth_token)]
   end
 
   describe "Telemetry send/4" do

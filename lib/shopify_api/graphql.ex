@@ -142,7 +142,7 @@ defmodule ShopifyAPI.GraphQL do
     response
   end
 
-  defp log_request(%{app_name: app, shop_name: shop} = _token, response, time) do
+  defp log_request(%{app_handle: app, myshopify_domain: shop} = _token, response, time) do
     Logger.debug(fn ->
       status =
         case response do
@@ -167,8 +167,8 @@ defmodule ShopifyAPI.GraphQL do
   defp log_request(scope, response, time) do
     log_request(
       %{
-        app_name: ShopifyAPI.Scopes.app_name(scope),
-        shop_name: ShopifyAPI.Scopes.myshopify_domain(scope)
+        app_handle: ShopifyAPI.Scopes.app_name(scope),
+        myshopify_domain: ShopifyAPI.Scopes.myshopify_domain(scope)
       },
       response,
       time

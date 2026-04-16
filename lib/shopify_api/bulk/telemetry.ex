@@ -7,13 +7,13 @@ defmodule ShopifyAPI.Bulk.Telemetry do
 
   def send(
         module_name,
-        %{app_name: app, shop_name: shop} = _token,
+        %{app_handle: app, myshopify_domain: myshopify_domain} = _token,
         {:error, type, reason},
         bulk_id
       ) do
     metadata = %{
       app: app,
-      shop: shop,
+      shop: myshopify_domain,
       module: module_name,
       bulk_id: bulk_id,
       type: type,
@@ -25,13 +25,13 @@ defmodule ShopifyAPI.Bulk.Telemetry do
 
   def send(
         module_name,
-        %{app_name: app, shop_name: shop} = _token,
+        %{app_handle: app, myshopify_domain: myshopify_domain} = _token,
         {:success, type},
         _bulk_id
       ) do
     metadata = %{
       app: app,
-      shop: shop,
+      shop: myshopify_domain,
       module: module_name,
       type: type
     }

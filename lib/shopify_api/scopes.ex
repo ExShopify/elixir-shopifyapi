@@ -14,7 +14,7 @@ defmodule ShopifyAPI.Scopes do
   def user_token(scope), do: Scope.user_token(scope)
 
   @spec myshopify_domain(Scope.t()) :: String.t()
-  def myshopify_domain(scope), do: shop(scope).domain
+  def myshopify_domain(scope), do: shop(scope).myshopify_domain
 
   @spec shop_slug(Scope.t()) :: String.t()
   def shop_slug(scope), do: scope |> myshopify_domain() |> ShopifyAPI.Shop.slug_from_domain()

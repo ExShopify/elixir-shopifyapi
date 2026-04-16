@@ -23,10 +23,10 @@ defmodule ShopifyAPI.GraphQL.ResponseTest do
                            method: :post,
                            options: [
                              token: %ShopifyAPI.AuthToken{
-                               app_name: "",
+                               app_handle: "",
                                code: "",
                                plus: false,
-                               shop_name: "localhost:60370",
+                               myshopify_domain: "localhost:60370",
                                timestamp: 0,
                                token: "1234"
                              }
@@ -58,10 +58,10 @@ defmodule ShopifyAPI.GraphQL.ResponseTest do
                                      method: :post,
                                      options: [
                                        token: %ShopifyAPI.AuthToken{
-                                         app_name: "",
+                                         app_handle: "",
                                          code: "",
                                          plus: false,
-                                         shop_name: "localhost:60536",
+                                         myshopify_domain: "localhost:60536",
                                          timestamp: 0,
                                          token: "1234"
                                        }
@@ -139,10 +139,10 @@ defmodule ShopifyAPI.GraphQL.ResponseTest do
              method: :post,
              options: [
                token: %ShopifyAPI.AuthToken{
-                 app_name: "",
+                 app_handle: "",
                  code: "",
                  plus: false,
-                 shop_name: "localhost:60536",
+                 myshopify_domain: "localhost:60536",
                  timestamp: 0,
                  token: "1234"
                }

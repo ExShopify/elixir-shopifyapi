@@ -5,7 +5,7 @@ defmodule ShopifyAPI.Plugs.WebhookScopeSetup do
 
   ## Options
 
-  - app_name: optional, the name of the app for look up in the AppServer if left blank
+  - app_handle: optional, the handle of the app for look up in the AppServer if left blank
     it will use the Application Config or the last element of the request path.
 
   ## Usage
@@ -33,8 +33,8 @@ defmodule ShopifyAPI.Plugs.WebhookScopeSetup do
   def init(opts), do: opts
 
   def call(%Plug.Conn{} = conn, opts) do
-    with app_name when is_binary(app_name) <- ShopifyAPI.Config.app_name(conn, opts),
-         {:ok, %ShopifyAPI.App{} = app} <- ShopifyAPI.AppServer.get(app_name),
+    with app_handle when is_binary(app_handle) <- ShopifyAPI.Config.app_handle(conn, opts),
+         {:ok, %ShopifyAPI.App{} = app} <- ShopifyAPI.AppServer.get(app_handle),
          myshopify_domain when is_binary(myshopify_domain) <- myshopify_domain(conn) do
       webhook_scope = %ShopifyAPI.Model.WebhookScope{
         shopify_api_version: shopify_api_version(conn),

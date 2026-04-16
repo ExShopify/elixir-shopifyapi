@@ -1,8 +1,8 @@
 defmodule ShopifyAPI.GraphQL.GraphQLTest do
   use ExUnit.Case
 
-  import ShopifyAPI.Factory
   import ShopifyAPI.SessionTokenSetup
+  import ShopifyAPI.BypassSetup
 
   alias Plug.Conn
 
@@ -55,12 +55,7 @@ defmodule ShopifyAPI.GraphQL.GraphQLTest do
 
   @variables %{input: %{id: "gid://shopify/Metafield/9208558682200"}}
 
-  setup _context do
-    bypass = Bypass.open()
-    {:ok, [bypass: bypass, shop: build(:shop, domain: "localhost:#{bypass.port}")]}
-  end
-
-  setup [:offline_token]
+  setup [:bypass, :offline_token]
 
   describe "execute/3" do
     defmodule FetchShopTest do

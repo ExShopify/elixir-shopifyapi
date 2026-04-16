@@ -31,7 +31,7 @@ defimpl ShopifyAPI.Scope, for: ShopifyAPI.Model.WebhookScope do
         token
 
       _ ->
-        raise "Failed to find AuthToken for Scope out of WebhookScope #{shop.domain} #{app.name} in AuthTokenServer"
+        raise "Failed to find AuthToken for Scope out of WebhookScope #{shop.domain} #{app.handle} in AuthTokenServer"
     end
   end
 

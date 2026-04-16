@@ -1,9 +1,7 @@
 defmodule Test.ShopifyAPI.ThrottledTest do
   use ExUnit.Case
-  alias ShopifyAPI.AuthToken
+  import ShopifyAPI.Factory
   alias ShopifyAPI.Throttled
-
-  @token %AuthToken{app_name: "test", shop_name: "throttled", plus: false}
 
   def func, do: send(self(), :func_called)
   def sleep_impl(_), do: send(self(), :sleep_called)
@@ -18,25 +16,29 @@ defmodule Test.ShopifyAPI.ThrottledTest do
     end
   end
 
+  setup do
+    [token: build(:auth_token)]
+  end
+
   describe "request/6" do
-    test "recurses when func returns graphql throttled response" do
+    test "recurses when func returns graphql throttled response", %{token: token} do
       func = fn ->
         send(self(), :func_called)
         {:error, %{body: %{"errors" => [%{"message" => "Throttled"}]}, status_code: 200}}
       end
 
       max_tries = 2
-      Throttled.request(func, @token, max_tries, TrackerMock)
+      Throttled.request(func, token, max_tries, TrackerMock)
       for _ <- 1..max_tries, do: assert_received(:func_called)
     end
 
-    test "updates api call limit and does not recurse when func returns success" do
+    test "updates api call limit and does not recurse when func returns success", %{token: token} do
       func = fn ->
         send(self(), :func_called)
         {:ok, %{status_code: 200}}
       end
 
-      Throttled.request(func, @token, TrackerMock)
+      Throttled.request(func, token, TrackerMock)
 
       assert_receive :update_api_call_limit_called
       assert_receive :func_called

@@ -7,16 +7,18 @@ defmodule ShopifyAPI.Config do
   def lookup(key, subkey), do: Application.get_env(:shopify_api, key)[subkey]
 
   if @single_app_install do
-    @spec app_name() :: String.t() | nil
-    @spec app_name(Plug.Conn.t(), keyword()) :: String.t() | nil
-    def app_name do
+    @spec app_handle() :: String.t() | nil
+    @spec app_handle(Plug.Conn.t(), keyword()) :: String.t() | nil
+    def app_handle do
       case app() do
-        %ShopifyAPI.App{} = app -> app.name
+        %ShopifyAPI.App{handle: handle} -> handle
         nil -> nil
       end
     end
 
-    def app_name(_conn, _opts \\ []), do: app_name()
+    def app_handle(_conn, opts \\ [])
+    def app_handle(_conn, []), do: app_handle()
+    def app_handle(_conn, opts), do: Keyword.get(opts, :app_handle) || app_handle()
 
     @spec app() :: ShopifyAPI.App.t() | nil
     def app do
@@ -26,17 +28,18 @@ defmodule ShopifyAPI.Config do
       end
     end
   else
-    @spec app_name() :: String.t() | nil
-    @spec app_name(Plug.Conn.t(), keyword()) :: String.t() | nil
-    def app_name, do: lookup(:app_name)
+    @spec app_handle() :: String.t() | nil
+    @spec app_handle(Plug.Conn.t(), keyword()) :: String.t() | nil
+    def app_handle, do: lookup(:app_handle)
 
-    def app_name(%Plug.Conn{path_info: path_info}, opts \\ []),
-      do: Keyword.get(opts, :app_name) || app_name() || List.last(path_info)
+    def app_handle(%Plug.Conn{path_info: path_info}, opts \\ []) do
+      Keyword.get(opts, :app_handle) || app_handle() || List.last(path_info)
+    end
 
     @spec app() :: ShopifyAPI.App.t() | nil
     def app do
-      with app_name when is_binary(app_name) <- app_name() do
-        ShopifyAPI.AppServer.get(app_name)
+      with app_handle when is_binary(app_handle) <- app_handle() do
+        ShopifyAPI.AppServer.get(app_handle)
       end
     end
   end

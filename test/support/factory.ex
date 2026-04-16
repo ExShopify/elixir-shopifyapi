@@ -12,13 +12,14 @@ defmodule ShopifyAPI.Factory do
   end
 
   def shopify_app_name, do: @shopify_app_name
+  def shopify_app_handle, do: "test-app"
   def shopify_app_secret, do: @shopify_app_secret
 
   def myshopify_domain, do: Faker.Internet.slug() <> ".myshopify.com"
 
   def shop_factory(params) do
-    domain = params[:domain] || myshopify_domain()
-    shop = %ShopifyAPI.Shop{domain: domain}
+    myshopify_domain = params[:myshopify_domain] || myshopify_domain()
+    shop = %ShopifyAPI.Shop{myshopify_domain: myshopify_domain}
     ShopifyAPI.ShopServer.set(shop)
     shop
   end
@@ -26,6 +27,7 @@ defmodule ShopifyAPI.Factory do
   def app_factory do
     app = %ShopifyAPI.App{
       name: shopify_app_name(),
+      handle: shopify_app_handle(),
       client_id: "#{__MODULE__}.id",
       client_secret: shopify_app_secret()
     }
@@ -35,19 +37,25 @@ defmodule ShopifyAPI.Factory do
   end
 
   def auth_token_factory(params) do
-    app_name = Map.get(params, :app_name, shopify_app_name())
-    shop_name = Map.get(params, :shop_name, myshopify_domain())
-    %ShopifyAPI.AuthToken{app_name: app_name, shop_name: shop_name, token: "test"}
+    app_handle = Map.get(params, :app_handle, shopify_app_handle())
+    myshopify_domain = Map.get(params, :myshopify_domain, myshopify_domain())
+
+    %ShopifyAPI.AuthToken{
+      app_handle: app_handle,
+      myshopify_domain: myshopify_domain,
+      token: "test"
+    }
   end
 
   def user_token_factory(params) do
-    shop_name = Map.get(params, :shop_name, myshopify_domain())
+    app_handle = Map.get(params, :app_handle, shopify_app_handle())
+    myshopify_domain = Map.get(params, :myshopify_domain, myshopify_domain())
     associated_user_id = String.to_integer(shopify_int_id(:user))
 
     %ShopifyAPI.UserToken{
       code: "ef91136f6d56c06c7339664dc51ee24f",
-      app_name: shopify_app_name(),
-      shop_name: shop_name,
+      app_handle: app_handle,
+      myshopify_domain: myshopify_domain,
       token: "shpua_8a2deac8ba1176ad2e3ec31652200d19",
       timestamp: DateTime.to_unix(DateTime.utc_now()),
       plus: false,

@@ -63,13 +63,13 @@ defmodule ShopifyAPI do
   depending on if you enable user_user_tokens.
   """
   @spec shopify_oauth_url(ShopifyAPI.App.t(), String.t(), list()) :: String.t()
-  def shopify_oauth_url(%ShopifyAPI.App{} = app, domain, opts \\ [])
-      when is_binary(domain) and is_list(opts) do
+  def shopify_oauth_url(%ShopifyAPI.App{} = app, myshopify_domain, opts \\ [])
+      when is_binary(myshopify_domain) and is_list(opts) do
     opts = Keyword.merge(@oauth_default_options, opts)
     user_token_query_params = opts |> Keyword.get(:use_user_tokens) |> per_user_query_params()
     query_params = oauth_query_params(app) ++ user_token_query_params
 
-    domain
+    myshopify_domain
     |> ShopifyAPI.Shop.to_uri()
     # TODO use URI.append_path when we drop 1.14 support
     |> URI.merge(shopify_oauth_path())

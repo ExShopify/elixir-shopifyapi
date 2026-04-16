@@ -13,8 +13,8 @@ defmodule ShopifyAPI.Plugs.AdminAuthenticator do
   When no HMAC is provided, the plug passes through without assigning the Shop, App and AuthToken.
   Shopify expects this behaviour and has started rejecting new apps that do not behave this way.
 
-  Make sure to include the App name in the path, in our example it is included directly in the
-  path `"/shop-admin/:app"`. Or include the :app_name in the mount parameters.
+  Make sure to include the App handle in the path, in our example it is included directly in the
+  path `"/shop-admin/:app_handle"`. Or include the :app_handle in the mount parameters.
 
   ## Example Usage
   ```elixir
@@ -79,12 +79,12 @@ defmodule ShopifyAPI.Plugs.AdminAuthenticator do
   # Offline token auth OR new install
   defp do_authentication(conn, options) do
     myshopify_domain = conn.params["shop"]
-    app_name = ShopifyAPI.Config.app_name(conn, options)
-    {:ok, app} = ShopifyAPI.AppServer.get(app_name)
+    app_handle = ShopifyAPI.Config.app_handle(conn, options)
+    {:ok, app} = ShopifyAPI.AppServer.get(app_handle)
 
     with :ok <- validate_hmac(app, conn.query_params),
          {:ok, shop} <- ShopifyAPI.ShopServer.get_or_create(myshopify_domain, true),
-         {:ok, auth_token} <- ShopifyAPI.AuthTokenServer.get(myshopify_domain, app_name) do
+         {:ok, auth_token} <- ShopifyAPI.AuthTokenServer.get(myshopify_domain, app_handle) do
       conn
       |> assign_app(app)
       |> assign_shop(shop)

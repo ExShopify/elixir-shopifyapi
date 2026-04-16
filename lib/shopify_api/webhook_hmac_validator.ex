@@ -21,7 +21,7 @@ defmodule ShopifyAPI.WebhookHMACValidator do
 
   ## Options
 
-  - app_name: optional, the name of the app for look up in the AppServer if left blank
+  - app_handle: optional, the name of the app for look up in the AppServer if left blank
     it will use the Application Config or the last element of the request path.
   """
   require Logger
@@ -38,9 +38,10 @@ defmodule ShopifyAPI.WebhookHMACValidator do
 
   def assign_hmac_validation(conn, body, opts) do
     with shopify_hmac when is_binary(shopify_hmac) <- get_header(conn, @shopify_hmac_header),
-         app_name when is_binary(app_name) <- ShopifyAPI.Config.app_name(conn, opts),
+         app_handle when is_binary(app_handle) <-
+           ShopifyAPI.Config.app_handle(conn, opts),
          {:ok, %ShopifyAPI.App{client_secret: client_secret}} <-
-           ShopifyAPI.AppServer.get(app_name) do
+           ShopifyAPI.AppServer.get(app_handle) do
       payload_hmac = ShopifyAPI.Security.base64_sha256_hmac(body, client_secret)
 
       assign(
