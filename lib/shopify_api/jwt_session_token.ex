@@ -23,15 +23,20 @@ defmodule ShopifyAPI.JWTSessionToken do
 
   def app(token) when is_binary(token), do: token |> JOSE.JWT.peek_payload() |> app()
 
+  @doc """
+  Extracts the shop name from the "dest" claim in the JWT. The "dest" claim may contain either a
+  full URL (e.g., "https://example.myshopify.com") or just the shop name (e.g., "example.myshopify.com").
+  """
   @spec myshopify_domain(JOSE.JWT.t()) :: {:ok, String.t()} | {:error, any()}
   def myshopify_domain(%JOSE.JWT{fields: %{"dest" => shop_url}}) do
-    shop_url
-    |> URI.parse()
-    |> Map.get(:host)
-    |> case do
-      shop_name when is_binary(shop_name) -> {:ok, shop_name}
-      _ -> {:error, "Shop name not found"}
-    end
+    myshopify_domain =
+      shop_url
+      |> String.trim_leading("https://")
+      |> String.trim_leading("http://")
+      |> String.split("/")
+      |> List.first()
+
+    {:ok, myshopify_domain}
   end
 
   def myshopify_domain(_), do: {:error, "Invalid user token or shop name not found"}
