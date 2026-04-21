@@ -1,7 +1,6 @@
 defmodule ShopifyAPI.GraphQL.GraphQLQueryTest do
   use ExUnit.Case, async: true
 
-  import ShopifyAPI.Factory
   import ShopifyAPI.SessionTokenSetup
   import ShopifyAPI.BypassSetup
 

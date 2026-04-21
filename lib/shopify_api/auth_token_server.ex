@@ -18,7 +18,7 @@ defmodule ShopifyAPI.AuthTokenServer do
   @spec set(AuthToken.t()) :: :ok
   @spec set(AuthToken.t(), boolean()) :: :ok
   def set(token, should_persist \\ true) when is_struct(token, AuthToken) do
-    :ets.insert(@table, {{token.shop_name, token.app_name}, token})
+    :ets.insert(@table, {{token.myshopify_domain, token.app_handle}, token})
     if should_persist, do: do_persist(token)
     :ok
   end
@@ -42,8 +42,8 @@ defmodule ShopifyAPI.AuthTokenServer do
   end
 
   @spec delete(String.t(), String.t()) :: :ok
-  def delete(shop_name, app) do
-    :ets.delete(@table, {shop_name, app})
+  def delete(myshopify_domain, app) when is_binary(myshopify_domain) do
+    :ets.delete(@table, {myshopify_domain, app})
     :ok
   end
 

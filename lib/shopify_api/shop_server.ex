@@ -20,44 +20,44 @@ defmodule ShopifyAPI.ShopServer do
   def count, do: :ets.info(@table, :size)
 
   @spec set(Shop.t(), boolean()) :: :ok
-  def set(%Shop{domain: domain} = shop, should_persist \\ false) do
-    :ets.insert(@table, {domain, shop})
+  def set(%Shop{myshopify_domain: myshopify_domain} = shop, should_persist \\ false) do
+    :ets.insert(@table, {myshopify_domain, shop})
     if should_persist, do: do_persist(shop)
     :ok
   end
 
   @spec get(String.t()) :: {:ok, Shop.t()} | :error
-  def get(domain) do
-    case :ets.lookup(@table, domain) do
-      [{^domain, shop}] -> {:ok, shop}
+  def get(myshopify_domain) do
+    case :ets.lookup(@table, myshopify_domain) do
+      [{^myshopify_domain, shop}] -> {:ok, shop}
       [] -> :error
     end
   end
 
   @spec get(String.t()) :: Shop.t() | nil
-  def find(domain) do
-    case get(domain) do
+  def find(myshopify_domain) do
+    case get(myshopify_domain) do
       {:ok, shop} -> shop
       _ -> nil
     end
   end
 
   @spec get_or_create(String.t(), boolean()) :: {:ok, Shop.t()}
-  def get_or_create(domain, should_persist \\ true) do
-    case get(domain) do
+  def get_or_create(myshopify_domain, should_persist \\ true) do
+    case get(myshopify_domain) do
       {:ok, _} = resp ->
         resp
 
       :error ->
-        shop = %Shop{domain: domain}
+        shop = %Shop{myshopify_domain: myshopify_domain}
         set(shop, should_persist)
         {:ok, shop}
     end
   end
 
   @spec delete(String.t()) :: :ok
-  def delete(domain) do
-    true = :ets.delete(@table, domain)
+  def delete(myshopify_domain) do
+    true = :ets.delete(@table, myshopify_domain)
     :ok
   end
 
@@ -93,10 +93,10 @@ defmodule ShopifyAPI.ShopServer do
   end
 
   # Attempts to persist a Shop if a persistence callback is configured
-  defp do_persist(%Shop{domain: domain} = shop) do
+  defp do_persist(%Shop{myshopify_domain: myshopify_domain} = shop) do
     case Config.lookup(__MODULE__, :persistence) do
-      {module, function, args} -> apply(module, function, [domain, shop | args])
-      {module, function} -> apply(module, function, [domain, shop])
+      {module, function, args} -> apply(module, function, [myshopify_domain, shop | args])
+      {module, function} -> apply(module, function, [myshopify_domain, shop])
       _ -> nil
     end
   end

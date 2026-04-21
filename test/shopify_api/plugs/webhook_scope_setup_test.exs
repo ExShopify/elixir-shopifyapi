@@ -30,13 +30,13 @@ defmodule ShopifyAPI.Plugs.WebhookScopeSetupTest do
     test "sets webhook scope on assigns", %{conn: conn, app: app, shop: shop} do
       conn =
         conn
-        |> put_req_header("x-shopify-shop-domain", shop.domain)
+        |> put_req_header("x-shopify-shop-domain", shop.myshopify_domain)
         |> put_req_header("x-shopify-topic", @topic)
         |> put_req_header("x-shopify-api-version", @api_version)
         |> WebhookScopeSetup.call([])
 
       %{assigns: %{webhook_scope: %Model.WebhookScope{} = webhook_scope}} = conn
-      assert webhook_scope.myshopify_domain == shop.domain
+      assert webhook_scope.myshopify_domain == shop.myshopify_domain
       assert webhook_scope.shop == shop
       assert webhook_scope.app == app
       assert webhook_scope.topic == @topic

@@ -161,7 +161,7 @@ defmodule ShopifyAPI.Throttled do
   end
 
   defp send_telemetry(
-         %{app_name: app, shop_name: shop} = _token,
+         %{app_handle: app_handle, myshopify_domain: myshopify_domain} = _token,
          available_count,
          wait_in_milliseconds,
          retry_depth,
@@ -176,7 +176,12 @@ defmodule ShopifyAPI.Throttled do
         wait_in_milliseconds: wait_in_milliseconds,
         retry_depth: retry_depth
       },
-      %{app: app, request_type: get_request_type(tracker_impl), shop: shop, status_code: status}
+      %{
+        app: app_handle,
+        request_type: get_request_type(tracker_impl),
+        shop: myshopify_domain,
+        status_code: status
+      }
     )
   end
 

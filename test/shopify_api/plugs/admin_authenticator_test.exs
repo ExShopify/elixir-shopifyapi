@@ -26,7 +26,7 @@ defmodule ShopifyAPI.Plugs.AdminAuthenticatorTest do
 
     params = %{
       test: "test",
-      shop: shop.domain,
+      shop: shop.myshopify_domain,
       id_token: jwt_session_token
     }
 
@@ -46,7 +46,7 @@ defmodule ShopifyAPI.Plugs.AdminAuthenticatorTest do
       # Create a test connection
       conn =
         :get
-        |> conn("/admin/#{app.name}?" <> URI.encode_query(params))
+        |> conn("/admin/#{app.handle}?" <> URI.encode_query(params))
         |> init_test_session(%{})
         |> Conn.fetch_query_params()
         |> AdminAuthenticator.call([])
@@ -62,7 +62,7 @@ defmodule ShopifyAPI.Plugs.AdminAuthenticatorTest do
       # Create a test connection
       conn =
         :get
-        |> conn("/admin/#{app.name}?" <> URI.encode_query(params))
+        |> conn("/admin/#{app.handle}?" <> URI.encode_query(params))
         |> init_test_session(%{})
         |> Conn.fetch_query_params()
 
@@ -92,7 +92,7 @@ defmodule ShopifyAPI.Plugs.AdminAuthenticatorTest do
       # Create a test connection
       conn =
         :get
-        |> conn("/admin/#{app.name}?" <> URI.encode_query(params))
+        |> conn("/admin/#{app.handle}?" <> URI.encode_query(params))
         |> init_test_session(%{})
         |> Conn.fetch_query_params()
 

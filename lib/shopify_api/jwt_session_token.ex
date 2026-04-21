@@ -23,15 +23,20 @@ defmodule ShopifyAPI.JWTSessionToken do
 
   def app(token) when is_binary(token), do: token |> JOSE.JWT.peek_payload() |> app()
 
+  @doc """
+  Extracts the shop name from the "dest" claim in the JWT. The "dest" claim may contain either a
+  full URL (e.g., "https://example.myshopify.com") or just the shop name (e.g., "example.myshopify.com").
+  """
   @spec myshopify_domain(JOSE.JWT.t()) :: {:ok, String.t()} | {:error, any()}
   def myshopify_domain(%JOSE.JWT{fields: %{"dest" => shop_url}}) do
-    shop_url
-    |> URI.parse()
-    |> Map.get(:host)
-    |> case do
-      shop_name when is_binary(shop_name) -> {:ok, shop_name}
-      _ -> {:error, "Shop name not found"}
-    end
+    myshopify_domain =
+      shop_url
+      |> String.trim_leading("https://")
+      |> String.trim_leading("http://")
+      |> String.split("/")
+      |> List.first()
+
+    {:ok, myshopify_domain}
   end
 
   def myshopify_domain(_), do: {:error, "Invalid user token or shop name not found"}
@@ -50,21 +55,13 @@ defmodule ShopifyAPI.JWTSessionToken do
   def get_offline_token(%JOSE.JWT{} = jwt, token) do
     with {:ok, myshopify_domain} <- myshopify_domain(jwt),
          {:ok, app} <- app(jwt) do
-      case ShopifyAPI.AuthTokenServer.get(myshopify_domain, app.name) do
+      case ShopifyAPI.AuthTokenServer.get(myshopify_domain, app.handle) do
         {:ok, _} = resp ->
           resp
 
         {:error, _} ->
           Logger.warning("No token found, exchanging for new")
-
-          case ShopifyAPI.AuthRequest.request_offline_access_token(app, myshopify_domain, token) do
-            {:ok, token} ->
-              fire_post_login_hook(token)
-              {:ok, token}
-
-            error ->
-              error
-          end
+          request_offline_token(app, myshopify_domain, token)
       end
     else
       error ->
@@ -81,26 +78,40 @@ defmodule ShopifyAPI.JWTSessionToken do
     with {:ok, myshopify_domain} <- myshopify_domain(jwt),
          {:ok, app} <- app(jwt),
          {:ok, user_id} <- user_id(jwt) do
-      case ShopifyAPI.UserTokenServer.get_valid(myshopify_domain, app.name, user_id) do
+      case ShopifyAPI.UserTokenServer.get_valid(myshopify_domain, app.handle, user_id) do
         {:ok, _} = resp ->
           resp
 
         {:error, :invalid_user_token} ->
           Logger.debug("Expired or no user token found, exchanging for new")
-
-          case ShopifyAPI.AuthRequest.request_online_access_token(app, myshopify_domain, token) do
-            {:ok, user_token} ->
-              fire_post_login_hook(user_token)
-              {:ok, user_token}
-
-            error ->
-              error
-          end
+          request_online_token(app, myshopify_domain, token)
       end
     else
       error ->
         Logger.warning("failed getting required informatio from the JWT #{inspect(error)}")
         {:error, :invalid_session_token}
+    end
+  end
+
+  defp request_offline_token(app, myshopify_domain, token) do
+    case ShopifyAPI.AuthRequest.request_offline_access_token(app, myshopify_domain, token) do
+      {:ok, token} ->
+        fire_post_login_hook(token)
+        {:ok, token}
+
+      error ->
+        error
+    end
+  end
+
+  defp request_online_token(app, myshopify_domain, token) do
+    case ShopifyAPI.AuthRequest.request_online_access_token(app, myshopify_domain, token) do
+      {:ok, token} ->
+        fire_post_login_hook(token)
+        {:ok, token}
+
+      error ->
+        error
     end
   end
 

@@ -55,7 +55,7 @@ defmodule ShopifyAPI.WebhookHMACValidatorTest do
       {:ok, body, conn} =
         conn
         |> put_req_header("x-shopify-hmac-sha256", hmac)
-        |> WebhookHMACValidator.read_body(app_name: "invalid")
+        |> WebhookHMACValidator.read_body(app_handle: "invalid")
 
       assert body == payload
       refute conn.assigns[:shopify_hmac_validated]

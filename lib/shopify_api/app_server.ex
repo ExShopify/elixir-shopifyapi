@@ -16,52 +16,58 @@ defmodule ShopifyAPI.AppServer do
   if @single_app_install do
     @spec set(App.t()) :: :ok
     def set(%App{} = app) do
-      GenServer.cast(@name, {:app, app})
-      do_persist(app)
-      :ok
+      # Put the app in as both the default app and under its handle for easy retrieval.
+      ets_set(:app, app)
+      ets_set(app.handle, app)
     end
 
-    @spec set(String.t(), App.t()) :: :ok
-    def set(_, app), do: set(app)
-
     @spec get(String.t()) :: {:ok, App.t()} | :error
-    def get(_name \\ ""), do: GenServer.call(@name, :app)
-
-    def get_by_client_id(client_id), do: get(client_id)
+    @spec get(atom()) :: {:ok, App.t()} | :error
+    def get(_handle \\ :app)
+    def get(:app), do: ets_get(:app)
+    def get(handle), do: ets_get(handle)
 
     def mode, do: :single_app
   else
-    def all, do: @table |> :ets.tab2list() |> Map.new()
-
-    @spec count() :: integer()
-    def count, do: :ets.info(@table, :size)
-
     @spec set(App.t()) :: :ok
-    def set(%App{name: name} = app), do: set(name, app)
-
-    @spec set(String.t(), App.t()) :: :ok
-    def set(name, app) when is_binary(name) and is_struct(app, App) do
-      :ets.insert(@table, {name, app})
-      do_persist(app)
-      :ok
-    end
+    def set(%App{handle: handle} = app), do: ets_set(handle, app)
 
     @spec get(String.t()) :: {:ok, App.t()} | :error
-    def get(name) when is_binary(name) do
-      case :ets.lookup(@table, name) do
-        [{^name, app}] -> {:ok, app}
-        [] -> :error
-      end
-    end
-
-    def get_by_client_id(client_id) do
-      case :ets.match_object(@table, {:_, %{client_id: client_id}}) do
-        [{_, app}] -> {:ok, app}
-        [] -> :error
-      end
-    end
+    @spec get(atom()) :: {:ok, App.t()} | :error
+    def get(handle), do: ets_get(handle)
 
     def mode, do: :multi_app
+  end
+
+  def all, do: @table |> :ets.tab2list() |> Map.new()
+
+  @spec count() :: integer()
+  def count, do: :ets.info(@table, :size)
+
+  defp ets_set(handle, %App{} = app) when is_atom(handle) or is_binary(handle) do
+    :ets.insert(@table, {handle, app})
+    do_persist(app)
+    :ok
+  end
+
+  def ets_get(handle) when is_atom(handle) or is_binary(handle) do
+    case :ets.lookup(@table, handle) do
+      [{^handle, app}] -> {:ok, app}
+      [] -> :error
+    end
+  end
+
+  @doc """
+  Retrieves an App by its client_id, if more then one App has the same client_id, one of them will be
+  returned but it is not guaranteed which one.
+  """
+  @spec get_by_client_id(String.t()) :: {:ok, App.t()} | :error
+  def get_by_client_id(client_id) when is_binary(client_id) do
+    case :ets.match_object(@table, {:_, %{client_id: client_id}}) do
+      [{_, app}] -> {:ok, app}
+      [{_, app} | _] -> {:ok, app}
+      [] -> :error
+    end
   end
 
   ## GenServer Callbacks
@@ -101,10 +107,10 @@ defmodule ShopifyAPI.AppServer do
   end
 
   # Attempts to persist a App if a persistence callback is configured
-  defp do_persist(%App{name: name} = app) do
+  defp do_persist(%App{handle: handle} = app) do
     case Config.lookup(__MODULE__, :persistence) do
-      {module, function, args} -> apply(module, function, [name, app | args])
-      {module, function} -> apply(module, function, [name, app])
+      {module, function, args} -> apply(module, function, [handle, app | args])
+      {module, function} -> apply(module, function, [handle, app])
       _ -> nil
     end
   end

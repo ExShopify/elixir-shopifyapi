@@ -9,7 +9,7 @@ defmodule ShopifyAPI.BypassSetup do
   def bypass(_context) do
     bypass = Bypass.open()
     myshopify_domain = "localhost:#{bypass.port}"
-    shop = build(:shop, domain: myshopify_domain)
+    shop = build(:shop, myshopify_domain: myshopify_domain)
     {:ok, [bypass: bypass, shop: shop, myshopify_domain: myshopify_domain]}
   end
 

@@ -70,11 +70,11 @@ defmodule ShopifyAPI.App do
   """
   @spec fetch_token(__MODULE__.t(), String.t(), String.t()) ::
           UserToken.ok_t() | AuthToken.ok_t() | {:error, String.t()}
-  def fetch_token(app, domain, auth_code) when is_struct(app, __MODULE__) do
-    case AuthRequest.post(app, domain, auth_code) do
+  def fetch_token(app, myshopify_domain, auth_code) when is_struct(app, __MODULE__) do
+    case AuthRequest.post(app, myshopify_domain, auth_code) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        Logger.info("#{__MODULE__} [#{domain}] fetched token")
-        body |> JSONSerializer.decode!() |> create_token(app, domain, auth_code)
+        Logger.info("#{__MODULE__} [#{myshopify_domain}] fetched token")
+        body |> JSONSerializer.decode!() |> create_token(app, myshopify_domain, auth_code)
 
       {:ok, %HTTPoison.Response{} = response} ->
         Logger.warning("#{__MODULE__} fetching token code: #{response.status_code}")
@@ -86,15 +86,15 @@ defmodule ShopifyAPI.App do
     end
   end
 
-  defp create_token(json, app, domain, auth_code)
+  defp create_token(json, app, myshopify_domain, auth_code)
        when is_map_key(json, "associated_user") and is_map_key(json, "access_token") do
     Logger.debug("online token")
-    {:ok, UserToken.from_auth_request(app, domain, auth_code, json)}
+    {:ok, UserToken.from_auth_request(app, myshopify_domain, auth_code, json)}
   end
 
-  defp create_token(%{"access_token" => token}, app, domain, auth_code) do
+  defp create_token(%{"access_token" => token}, app, myshopify_domain, auth_code) do
     Logger.debug("offline token")
-    {:ok, AuthToken.new(app, domain, auth_code, token)}
+    {:ok, AuthToken.new(app, myshopify_domain, auth_code, token)}
   end
 
   defp create_token(_, _, _, _), do: {:error, "Unable to create token"}

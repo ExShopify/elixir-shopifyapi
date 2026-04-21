@@ -25,7 +25,11 @@ defmodule ShopifyAPI.UserTokenServer do
   @spec set(UserToken.t()) :: :ok
   @spec set(UserToken.t(), boolean()) :: :ok
   def set(token, should_persist \\ true) when is_struct(token, UserToken) do
-    :ets.insert(@table, {{token.shop_name, token.app_name, token.associated_user_id}, token})
+    :ets.insert(
+      @table,
+      {{token.myshopify_domain, token.app_handle, token.associated_user_id}, token}
+    )
+
     if should_persist, do: do_persist(token)
     :ok
   end
@@ -68,7 +72,7 @@ defmodule ShopifyAPI.UserTokenServer do
 
   @spec delete(UserToken.t()) :: :ok
   def delete(token) do
-    :ets.delete(@table, {token.shop_name, token.app_name, token.associated_user_id})
+    :ets.delete(@table, {token.myshopify_domain, token.app_handle, token.associated_user_id})
     :ok
   end
 

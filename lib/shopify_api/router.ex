@@ -27,7 +27,7 @@ defmodule ShopifyAPI.Router do
     Logger.info("Authorized #{shop_domain(conn)}")
 
     if conn.params[@auth_code_param_name] != nil do
-      with {:ok, app} <- conn |> app_name() |> AppServer.get(),
+      with {:ok, app} <- conn |> app_label() |> AppServer.get(),
            true <- verify_nonce(app, conn.query_params),
            true <- verify_params_with_hmac(app, conn.query_params),
            {:ok, auth_token} <- request_auth_token(conn, app),
@@ -40,13 +40,14 @@ defmodule ShopifyAPI.Router do
           %AuthToken{} ->
             ShopifyAPI.AuthTokenServer.set(auth_token, true)
             ShopifyAPI.Shop.post_login(auth_token)
-            Logger.debug("new login for #{shop.domain}, redirecting to shopify admin")
+
+            Logger.debug("new login for #{shop.myshopify_domain}, redirecting to shopify admin")
 
           %UserToken{associated_user_id: associated_user_id} ->
             ShopifyAPI.UserTokenServer.set(auth_token, true)
 
             Logger.debug(
-              "new login for user #{associated_user_id} from #{shop.domain}, redirecting to shopify admin"
+              "new login for user #{associated_user_id} from #{shop.myshopify_domain}, redirecting to shopify admin"
             )
 
             ShopifyAPI.Shop.post_login(auth_token)
@@ -100,7 +101,7 @@ defmodule ShopifyAPI.Router do
   end
 
   defp install_app(conn) do
-    case conn |> app_name() |> AppServer.get() do
+    case conn |> app_label() |> AppServer.get() do
       {:ok, app} ->
         oauth_url = ShopifyAPI.shopify_oauth_url(app, shop_domain(conn))
         Logger.debug("redirecting to Shop oauth url: #{oauth_url}")
@@ -128,7 +129,7 @@ defmodule ShopifyAPI.Router do
   def shop_domain(conn), do: shop_domain_from_header(conn) || conn.params["shop"]
 
   @doc false
-  defp app_name(conn), do: conn.params["app"] || List.last(conn.path_info)
+  defp app_label(conn), do: conn.params["app"] || List.last(conn.path_info)
 
   @doc false
   @spec verify_params_with_hmac(ShopifyAPI.App.t(), map()) :: boolean()
@@ -141,13 +142,13 @@ defmodule ShopifyAPI.Router do
       |> ShopifyAPI.Security.base16_sha256_hmac(secret)
   end
 
-  defp shop_from_auth_token(%ShopifyAPI.AuthToken{shop_name: myshopify_domain}),
-    do: %ShopifyAPI.Shop{domain: myshopify_domain}
+  defp shop_from_auth_token(%ShopifyAPI.AuthToken{myshopify_domain: myshopify_domain}),
+    do: %ShopifyAPI.Shop{myshopify_domain: myshopify_domain}
 
-  defp shop_from_auth_token(%ShopifyAPI.UserToken{shop_name: myshopify_domain}),
-    do: %ShopifyAPI.Shop{domain: myshopify_domain}
+  defp shop_from_auth_token(%ShopifyAPI.UserToken{myshopify_domain: myshopify_domain}),
+    do: %ShopifyAPI.Shop{myshopify_domain: myshopify_domain}
 
-  defp installed_redirect_uri(%_{client_id: app_api_key}, %_{domain: myshopify_domain}) do
+  defp installed_redirect_uri(%_{client_id: app_api_key}, %_{myshopify_domain: myshopify_domain}) do
     %URI{
       scheme: "https",
       port: 443,

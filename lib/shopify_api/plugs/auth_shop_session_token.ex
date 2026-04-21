@@ -31,7 +31,7 @@ defmodule ShopifyAPI.Plugs.AuthShopSessionToken do
          {:ok, myshopify_domain} <- JWTSessionToken.myshopify_domain(jwt),
          {:ok, user_id} <- JWTSessionToken.user_id(jwt),
          {:ok, shop} <- ShopServer.get(myshopify_domain),
-         {:ok, auth_token} <- AuthTokenServer.get(myshopify_domain, app.name),
+         {:ok, auth_token} <- AuthTokenServer.get(myshopify_domain, app.handle),
          {:ok, user_token} <- JWTSessionToken.get_user_token(jwt, token) do
       conn
       |> assign(:app, app)

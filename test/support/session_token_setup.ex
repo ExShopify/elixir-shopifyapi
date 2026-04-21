@@ -4,7 +4,7 @@ defmodule ShopifyAPI.SessionTokenSetup do
   def offline_token(context) do
     app = context[:app] || build(:app)
     shop = context[:shop] || build(:shop)
-    token = build(:auth_token, %{app_name: app.name, shop_name: shop.domain})
+    token = build(:auth_token, %{app_handle: app.handle, myshopify_domain: shop.myshopify_domain})
     ShopifyAPI.AuthTokenServer.set(token)
     [offline_token: token]
   end
@@ -12,7 +12,7 @@ defmodule ShopifyAPI.SessionTokenSetup do
   def online_token(context) do
     app = context[:app] || build(:app)
     shop = context[:shop] || build(:shop)
-    token = build(:user_token, %{app_name: app.name, shop_name: shop.domain})
+    token = build(:user_token, %{app_handle: app.handle, myshopify_domain: shop.myshopify_domain})
     ShopifyAPI.UserTokenServer.set(token)
     [online_token: token]
   end
@@ -20,7 +20,7 @@ defmodule ShopifyAPI.SessionTokenSetup do
   def jwt_session_token(%{app: app, shop: shop, online_token: online_token}) do
     payload = %{
       "aud" => app.client_id,
-      "dest" => "http://#{shop.domain}",
+      "dest" => "http://#{shop.myshopify_domain}",
       "sub" => "#{online_token.associated_user_id}"
     }
 
